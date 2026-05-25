@@ -1,0 +1,97 @@
+/* Print-specific styles for Pier portfolio PDF.
+   Stacks app frames at a fixed 1440x900 (16:10) per page. */
+
+@page {
+  size: 1440px 900px;
+  margin: 0;
+}
+
+html, body {
+  overflow: visible !important;
+  background: var(--bg) !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+#root {
+  width: 1440px !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Each frame = one printed page. */
+.print-page {
+  width: 1440px;
+  height: 900px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  break-before: page;
+  page-break-before: always;
+  background: var(--bg);
+  position: relative;
+}
+.print-page:first-child {
+  break-before: auto;
+  page-break-before: auto;
+}
+
+.print-page .app-body {
+  height: 852px; /* 900 - 48 topbar */
+  flex: none;
+}
+
+/* On-screen preview separator (only when not printing). */
+@media screen {
+  .print-page {
+    margin-bottom: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    border: 1px solid var(--line-2);
+  }
+  body { padding: 24px 0; }
+}
+
+/* Caption / "slide number" overlay per page. */
+.print-caption {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: flex;
+  gap: 8px;
+  z-index: 50;
+}
+.print-caption .num { color: var(--signal); }
+
+@media print {
+  /* Disable interactivity/animation states. */
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .pulse, .live-dot::before { animation: none !important; }
+  /* Force scrollable inner containers to show fully (but clipped by .print-page) */
+  .content,
+  .sidenav,
+  .filters,
+  .catalog,
+  .builder-main,
+  .step-rail,
+  .tc-log,
+  .activity-list {
+    overflow: hidden !important;
+  }
+}
+
+/* Tighter sizing tweaks so content fits in 900px. */
+.print-page .registry-head { padding: 18px 28px 12px; }
+.print-page .activity-head { margin-bottom: 14px; }
+.print-page .tc-page { padding: 18px 28px; }
+.print-page .tc-page-head { margin-bottom: 14px; }
