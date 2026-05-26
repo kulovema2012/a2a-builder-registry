@@ -218,7 +218,7 @@ function RegistryPage() {
   const toggle = (group: string, val: string) =>
     setFilters((f) => {
       const s = new Set(f[group]);
-      s.has(val) ? s.delete(val) : s.add(val);
+      if (s.has(val)) s.delete(val); else s.add(val);
       return { ...f, [group]: s };
     });
 

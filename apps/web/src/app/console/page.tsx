@@ -146,7 +146,7 @@ export default function ConsolePage() {
         <div>
           <div className="tiny">Test console</div>
           <h1>Send a sample A2A request</h1>
-          <p className="muted" style={{ maxWidth: 560 }}>Pick any registered agent and send a message through Pier's controlled test runner. Credentials are read from the secret store and never exposed.</p>
+          <p className="muted" style={{ maxWidth: 560 }}>Pick any registered agent and send a message through Pier&apos;s controlled test runner. Credentials are read from the secret store and never exposed.</p>
         </div>
       </div>
       <TestConsole agentId={agentId} agents={agents} />

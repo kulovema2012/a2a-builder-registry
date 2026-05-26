@@ -29,7 +29,7 @@ export default function ImportPage() {
     <div style={{ maxWidth: 640, margin: "0 auto" }}>
       <div style={{ marginBottom: 24 }}>
         <h1>Import Agent Card</h1>
-        <p className="muted">Import an existing A2A Agent Card from a URL. We'll fetch, validate, and register the service.</p>
+        <p className="muted">Import an existing A2A Agent Card from a URL. We&apos;ll fetch, validate, and register the service.</p>
       </div>
 
       <div className="card section">

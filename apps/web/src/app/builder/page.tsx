@@ -143,7 +143,7 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
         <button className={"start-tile" + (!importMode ? " on" : "")} onClick={() => { setImportMode(false); setStep(1); }}>
           <div className="start-tile-icon"><Icon name="beaker" size={20} /></div>
           <h3>Build with the guided form</h3>
-          <p className="muted">8 short steps. We'll generate a valid Agent Card and run validation as you go.</p>
+          <p className="muted">8 short steps. We&apos;ll generate a valid Agent Card and run validation as you go.</p>
           <span className="muted mono" style={{ fontSize: 11 }}>~ 4 min</span>
         </button>
         <button className={"start-tile" + (importMode ? " on" : "")} onClick={() => setImportMode(true)}>
@@ -397,7 +397,7 @@ function ExamplesStep({ draft }: { draft: DraftType }) {
     <div>
       <div className="builder-help">
         <Icon name="terminal" size={14} className="muted" />
-        <span>We'll send these sample messages during validation to confirm each skill actually responds. Pick at least one per skill.</span>
+        <span>We&apos;ll send these sample messages during validation to confirm each skill actually responds. Pick at least one per skill.</span>
       </div>
       <div className="card section" style={{ maxWidth: 720, marginTop: 16 }}>
         <div className="section-head"><h3>Validation request preview</h3></div>

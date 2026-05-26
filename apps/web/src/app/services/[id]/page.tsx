@@ -274,7 +274,7 @@ function ValidationTab({ runs, serviceId }: { runs: ValidationRun[]; serviceId: 
           </button>
         </div>
         {runs.length === 0 ? (
-          <p className="muted">No validation runs yet. Click "Run now" to validate this service.</p>
+          <p className="muted">No validation runs yet. Click &quot;Run now&quot; to validate this service.</p>
         ) : (
           <table className="run-table">
             <thead><tr><th>When</th><th>Status</th><th>Score</th><th>Response</th></tr></thead>
