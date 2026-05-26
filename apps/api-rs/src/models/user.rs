@@ -15,6 +15,7 @@ pub struct User {
     pub created_at: DateTime<Utc>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct Organization {
     pub id: Uuid,

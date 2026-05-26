@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct ValidationRun {
     pub id: Uuid,
@@ -18,6 +19,7 @@ pub struct ValidationRun {
     pub created_at: DateTime<Utc>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct RegistryEvent {
     pub id: Uuid,

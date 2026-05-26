@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize, Deserialize)]
 pub struct Service {
     pub id: Uuid,
@@ -25,6 +26,7 @@ pub struct Service {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize, Deserialize)]
 pub struct ServiceEndpoint {
     pub id: Uuid,
@@ -38,6 +40,7 @@ pub struct ServiceEndpoint {
     pub created_at: Option<DateTime<Utc>>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize, Deserialize)]
 pub struct Skill {
     pub id: Uuid,
@@ -53,6 +56,7 @@ pub struct Skill {
     pub created_at: Option<DateTime<Utc>>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
 pub struct AgentCardSnapshot {
     pub id: Uuid,
