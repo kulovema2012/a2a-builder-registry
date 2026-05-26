@@ -1,5 +1,20 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const TOKEN_KEY = "access_token";
+
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token: string) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
 interface FetchOptions extends RequestInit {
   params?: Record<string, string>;
 }
@@ -18,7 +33,16 @@ async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T>
     ...(fetchOptions.headers as Record<string, string>),
   };
 
+  const token = getToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(url, { ...fetchOptions, headers });
+
+  if (res.status === 401) {
+    clearToken();
+    if (typeof window !== "undefined") window.location.href = "/login";
+    throw new Error("Session expired");
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: res.statusText }));
@@ -29,21 +53,25 @@ async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T>
   return res.json();
 }
 
-// Service types
+// --- Types ---
+
 export interface Service {
   id: string;
   organization_id: string;
   name: string;
   slug: string;
-  description: string;
+  description: string | null;
   provider_name: string | null;
   provider_url: string | null;
   visibility: string;
   status: string;
-  tags: string[];
+  owner_user_id: string | null;
+  current_snapshot_id: string | null;
+  tags: string[] | null;
   icon_url: string | null;
   documentation_url: string | null;
-  version: string;
+  version: string | null;
+  delegates_to: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -51,12 +79,12 @@ export interface Service {
 export interface Endpoint {
   id: string;
   service_id: string;
-  agent_card_url: string;
-  base_url: string;
-  protocol_binding: string;
-  protocol_version: string;
+  agent_card_url: string | null;
+  base_url: string | null;
+  protocol_binding: string | null;
+  protocol_version: string | null;
   tenant: string | null;
-  is_preferred: boolean;
+  is_preferred: boolean | null;
   created_at: string;
 }
 
@@ -65,19 +93,19 @@ export interface Skill {
   service_id: string;
   external_skill_id: string | null;
   name: string;
-  description: string;
-  tags: string[];
-  input_modes: string[];
-  output_modes: string[];
-  examples: Record<string, unknown>[];
-  security_requirements: Record<string, unknown> | null;
+  description: string | null;
+  tags: string[] | null;
+  input_modes: string[] | null;
+  output_modes: string[] | null;
+  examples: unknown;
+  security_requirements: unknown;
 }
 
 export interface AgentCardSnapshot {
   id: string;
   service_id: string;
-  raw_json: Record<string, unknown>;
-  normalized_json: Record<string, unknown> | null;
+  raw_json: unknown;
+  normalized_json: unknown;
   schema_version: string | null;
   checksum: string | null;
   fetched_at: string;
@@ -89,56 +117,101 @@ export interface ValidationRun {
   service_id: string;
   status: string;
   score: number;
-  checks: ValidationCheck[];
-  errors: ValidationCheck[];
-  warnings: ValidationCheck[];
+  checks: unknown[];
+  errors: unknown[];
+  warnings: unknown[];
   response_time_ms: number | null;
   started_at: string | null;
   finished_at: string | null;
   created_at: string;
 }
 
-export interface ValidationCheck {
-  check: string;
-  status: string;
-  message: string;
-  field?: string;
-  details?: Record<string, unknown>;
-}
-
-export interface PaginatedServices {
-  items: Service[];
-  total: number;
-  page: number;
-  page_size: number;
-  total_pages: number;
-}
-
 export interface RegistryAgent {
-  service_id: string;
+  id: string;
+  name: string;
   slug: string;
-  visibility: string;
-  validation_status: string | null;
-  last_validated_at: string | null;
-  agent_card: Record<string, unknown> | null;
+  description: string | null;
+  provider: { organization: string | null; url: string | null };
+  tags: string[] | null;
+  version: string | null;
+  delegatesTo: string[] | null;
+  agentCard: unknown;
+  createdAt: string;
 }
 
-export interface TestResult {
-  success: boolean;
-  status_code: number | null;
-  response_body: Record<string, unknown> | null;
-  response_time_ms: number | null;
-  error: string | null;
+export interface RegistryEvent {
+  id: string;
+  serviceId: string | null;
+  serviceName: string | null;
+  serviceSlug: string | null;
+  actorId: string | null;
+  eventType: string;
+  metadata: unknown;
+  createdAt: string;
 }
 
-// API functions
+export interface TestConsoleResponse {
+  task_id: string;
+  status: string;
+  messages: unknown[];
+  raw_request: unknown;
+  raw_response: unknown;
+}
+
+export interface McpConnection {
+  id: string;
+  service_id: string;
+  name: string;
+  transport: string;
+  endpoint_url: string;
+  verified: boolean;
+  last_verified_at: string | null;
+  created_at: string;
+}
+
+export interface UserPublic {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  org_id: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+}
+
+// --- API ---
+
+export const auth = {
+  register: (data: { name: string; email: string; password: string; org_name: string }) =>
+    apiFetch<UserPublic>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
+
+  login: async (email: string, password: string) => {
+    const res = await apiFetch<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+    setToken(res.access_token);
+    return res;
+  },
+
+  logout: () => {
+    clearToken();
+    if (typeof window !== "undefined") window.location.href = "/login";
+  },
+};
+
 export const api = {
+  health: () => apiFetch<{ status: string; version: string; database: string }>("/health"),
+
   // Services
   createService: (data: Partial<Service>) =>
     apiFetch<Service>("/services", { method: "POST", body: JSON.stringify(data) }),
 
   listServices: (params?: Record<string, string>) =>
-    apiFetch<PaginatedServices>("/services", { params }),
+    apiFetch<{ services: Service[]; page: number }>("/services", { params }),
 
   getService: (id: string) =>
     apiFetch<Service>(`/services/${id}`),
@@ -147,18 +220,18 @@ export const api = {
     apiFetch<Service>(`/services/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
 
   deleteService: (id: string) =>
-    apiFetch<void>(`/services/${id}`, { method: "DELETE" }),
+    apiFetch<{ message: string }>(`/services/${id}`, { method: "DELETE" }),
 
   // Endpoints
   listEndpoints: (serviceId: string) =>
-    apiFetch<Endpoint[]>(`/services/${serviceId}/endpoints`),
+    apiFetch<{ endpoints: Endpoint[] }>(`/services/${serviceId}/endpoints`),
 
   addEndpoint: (serviceId: string, data: Partial<Endpoint>) =>
     apiFetch<Endpoint>(`/services/${serviceId}/endpoints`, { method: "POST", body: JSON.stringify(data) }),
 
   // Skills
   listSkills: (serviceId: string) =>
-    apiFetch<Skill[]>(`/services/${serviceId}/skills`),
+    apiFetch<{ skills: Skill[] }>(`/services/${serviceId}/skills`),
 
   addSkill: (serviceId: string, data: Partial<Skill>) =>
     apiFetch<Skill>(`/services/${serviceId}/skills`, { method: "POST", body: JSON.stringify(data) }),
@@ -167,8 +240,8 @@ export const api = {
   importAgentCard: (agentCardUrl: string) =>
     apiFetch<Service>("/services/import", { method: "POST", body: JSON.stringify({ agent_card_url: agentCardUrl }) }),
 
-  generateAgentCard: (serviceId: string, data: Record<string, unknown>) =>
-    apiFetch<AgentCardSnapshot>(`/services/${serviceId}/agent-card/generate`, { method: "POST", body: JSON.stringify(data) }),
+  generateAgentCard: (serviceId: string) =>
+    apiFetch<AgentCardSnapshot>(`/services/${serviceId}/agent-card/generate`, { method: "POST" }),
 
   getAgentCard: (serviceId: string) =>
     apiFetch<AgentCardSnapshot>(`/services/${serviceId}/agent-card`),
@@ -178,24 +251,49 @@ export const api = {
     apiFetch<ValidationRun>(`/services/${serviceId}/validate`, { method: "POST" }),
 
   listValidationRuns: (serviceId: string) =>
-    apiFetch<ValidationRun[]>(`/services/${serviceId}/validation-runs`),
+    apiFetch<{ runs: ValidationRun[] }>(`/services/${serviceId}/validation-runs`),
 
   // Registry
   discoverAgents: (params?: Record<string, string>) =>
-    apiFetch<RegistryAgent[]>("/registry/agents", { params }),
+    apiFetch<{ agents: RegistryAgent[]; page: number }>("/registry/agents", { params }),
 
-  // Publication
+  getAgent: (id: string) =>
+    apiFetch<RegistryAgent>(`/registry/agents/${id}`),
+
   requestPublication: (serviceId: string) =>
-    apiFetch<unknown>(`/registry/services/${serviceId}/publish-request`, { method: "POST" }),
+    apiFetch<{ id: string; status: string }>(`/registry/services/${serviceId}/publish-request`, { method: "POST" }),
+
+  // Events
+  listEvents: (params?: Record<string, string>) =>
+    apiFetch<{ events: RegistryEvent[]; page: number }>("/registry/events", { params }),
 
   // Test Console
-  sendTestRequest: (data: { service_id: string; endpoint_id?: string; method: string; payload: Record<string, unknown> }) =>
-    apiFetch<TestResult>("/test-console/send", { method: "POST", body: JSON.stringify(data) }),
+  sendTestRequest: (data: { service_id: string; skill_id?: string; message: string }) =>
+    apiFetch<TestConsoleResponse>("/test-console/send", { method: "POST", body: JSON.stringify(data) }),
 
   // Admin
-  approveService: (serviceId: string, approved: boolean, notes?: string) =>
-    apiFetch<unknown>(`/admin/services/${serviceId}/approve`, { method: "POST", body: JSON.stringify({ approved, notes }) }),
+  listPendingServices: (params?: Record<string, string>) =>
+    apiFetch<{ services: unknown[]; page: number }>("/admin/services", { params }),
+
+  approveService: (serviceId: string, action: string, notes?: string) =>
+    apiFetch<{ service_id: string; action: string; status: string }>(
+      `/admin/services/${serviceId}/approve`,
+      { method: "POST", body: JSON.stringify({ action, notes }) },
+    ),
 
   suspendService: (serviceId: string) =>
-    apiFetch<Service>(`/admin/services/${serviceId}/suspend`, { method: "POST" }),
+    apiFetch<{ service_id: string; status: string }>(`/admin/services/${serviceId}/suspend`, { method: "POST" }),
+
+  // MCP
+  listMcpConnections: (serviceId: string) =>
+    apiFetch<{ connections: McpConnection[] }>(`/mcp/connections?service_id=${serviceId}`),
+
+  createMcpConnection: (serviceId: string, data: { name: string; transport: string; endpoint_url: string }) =>
+    apiFetch<McpConnection>("/mcp/connections", { method: "POST", body: JSON.stringify({ ...data, service_id: serviceId }) }),
+
+  deleteMcpConnection: (connectionId: string) =>
+    apiFetch<{ message: string }>(`/mcp/connections/${connectionId}`, { method: "DELETE" }),
+
+  initializeMcp: (serviceId: string) =>
+    apiFetch<unknown>(`/mcp/initialize`, { method: "POST", body: JSON.stringify({ service_id: serviceId }) }),
 };

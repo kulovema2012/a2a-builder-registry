@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, type Service } from "@/lib/api";
-import { Card, Button, Input } from "@/components/shared/ui";
+import { Icon } from "@/components/shared/icon";
+import { api } from "@/lib/api";
 
 export default function ImportPage() {
   const router = useRouter();
@@ -26,49 +26,54 @@ export default function ImportPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Import Agent Card</h1>
-        <p className="text-[var(--text-secondary)] mt-1">
-          Import an existing A2A Agent Card from a URL. The system will fetch, validate, and register the service.
-        </p>
+    <div style={{ maxWidth: 640, margin: "0 auto" }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1>Import Agent Card</h1>
+        <p className="muted">Import an existing A2A Agent Card from a URL. We'll fetch, validate, and register the service.</p>
       </div>
 
-      <Card>
-        <div className="space-y-4">
-          <Input
-            label="Agent Card URL"
+      <div className="card section">
+        <div className="field">
+          <div className="label">Agent Card URL<span className="req">*</span></div>
+          <input
+            className="input mono"
             placeholder="https://example.com/.well-known/agent-card.json"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            error={error}
           />
-
-          <div className="bg-[var(--bg-primary)] rounded-lg p-4 text-sm text-[var(--text-secondary)]">
-            <p className="font-medium text-[var(--text-primary)] mb-2">What happens during import:</p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Fetches the Agent Card JSON from the URL</li>
-              <li>Parses and normalizes the metadata</li>
-              <li>Creates a service record with endpoints and skills</li>
-              <li>Runs schema validation and endpoint checks</li>
-              <li>Stores the snapshot with a checksum</li>
-            </ol>
-          </div>
-
-          <Button onClick={handleImport} disabled={importing || !url.trim()} className="w-full">
-            {importing ? "Importing..." : "Import Agent Card"}
-          </Button>
+          {error && <div className="help" style={{ color: "var(--err)" }}>{error}</div>}
         </div>
-      </Card>
 
-      <Card>
-        <h3 className="font-semibold mb-2">Accepted URLs</h3>
-        <ul className="text-sm text-[var(--text-secondary)] space-y-1">
-          <li>&bull; <code className="text-xs bg-[var(--bg-hover)] px-1 rounded">https://your-agent.com/.well-known/agent-card.json</code></li>
-          <li>&bull; <code className="text-xs bg-[var(--bg-hover)] px-1 rounded">https://your-agent.com/agent-card.json</code></li>
-          <li>&bull; Any URL returning a valid A2A Agent Card JSON object</li>
+        <div style={{ background: "var(--surface-2)", borderRadius: 8, padding: 16, margin: "16px 0", fontSize: 13, color: "var(--text-2)" }}>
+          <div style={{ fontWeight: 500, color: "var(--text-1)", marginBottom: 8 }}>What happens during import:</div>
+          <ol style={{ listStyle: "decimal", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 4 }}>
+            <li>Fetches the Agent Card JSON from the URL</li>
+            <li>Parses and normalizes the metadata</li>
+            <li>Creates a service record with endpoints and skills</li>
+            <li>Runs schema validation and endpoint checks</li>
+            <li>Stores the snapshot with a checksum</li>
+          </ol>
+        </div>
+
+        <button
+          className="btn btn-primary"
+          style={{ width: "100%" }}
+          onClick={handleImport}
+          disabled={importing || !url.trim()}
+        >
+          <Icon name="download" size={14} />
+          {importing ? "Importing…" : "Import Agent Card"}
+        </button>
+      </div>
+
+      <div className="card section" style={{ marginTop: 16 }}>
+        <div style={{ fontWeight: 500, marginBottom: 8 }}>Accepted URLs</div>
+        <ul style={{ fontSize: 13, color: "var(--text-2)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <li><code className="mono" style={{ fontSize: 11, background: "var(--surface-2)", padding: "2px 6px", borderRadius: 4 }}>https://your-agent.com/.well-known/agent-card.json</code></li>
+          <li><code className="mono" style={{ fontSize: 11, background: "var(--surface-2)", padding: "2px 6px", borderRadius: 4 }}>https://your-agent.com/agent-card.json</code></li>
+          <li>Any URL returning a valid A2A Agent Card JSON object</li>
         </ul>
-      </Card>
+      </div>
     </div>
   );
 }
