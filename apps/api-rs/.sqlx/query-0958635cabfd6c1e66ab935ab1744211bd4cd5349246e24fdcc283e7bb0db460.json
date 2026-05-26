@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, service_id, raw_json, normalized_json, schema_version, checksum, fetched_at, created_at\n        FROM agent_card_snapshots WHERE service_id = $1 ORDER BY created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "service_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "raw_json",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 3,
+        "name": "normalized_json",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "schema_version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "checksum",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "fetched_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "0958635cabfd6c1e66ab935ab1744211bd4cd5349246e24fdcc283e7bb0db460"
+}

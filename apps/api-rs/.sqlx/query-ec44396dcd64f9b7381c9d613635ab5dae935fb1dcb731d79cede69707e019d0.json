@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE services SET status = 'suspended'::service_status, updated_at = now()\n        WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ec44396dcd64f9b7381c9d613635ab5dae935fb1dcb731d79cede69707e019d0"
+}

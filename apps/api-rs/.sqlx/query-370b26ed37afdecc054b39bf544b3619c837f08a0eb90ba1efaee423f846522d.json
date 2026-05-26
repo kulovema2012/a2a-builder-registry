@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE mcp_connections\n                SET is_verified = TRUE, verified_at = $1, capabilities = $2\n                WHERE id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "370b26ed37afdecc054b39bf544b3619c837f08a0eb90ba1efaee423f846522d"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT base_url, agent_card_url FROM service_endpoints WHERE service_id = $1 AND is_preferred = TRUE LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "base_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "agent_card_url",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "5836094ba4c8a4ee7dcf0d531eda84a6414154886734a471e1d94b8c41c32733"
+}

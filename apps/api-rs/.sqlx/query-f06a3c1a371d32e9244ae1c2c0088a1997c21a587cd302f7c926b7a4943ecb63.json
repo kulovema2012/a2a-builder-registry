@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO registry_events (service_id, actor_id, event_type, metadata)\n        VALUES ($1, $2, 'service.created', $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f06a3c1a371d32e9244ae1c2c0088a1997c21a587cd302f7c926b7a4943ecb63"
+}

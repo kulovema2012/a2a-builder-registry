@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.name, s.slug, s.description, s.provider_name, s.version, s.tags,\n            (SELECT normalized_json FROM agent_card_snapshots acs\n             WHERE acs.service_id = s.id ORDER BY acs.created_at DESC LIMIT 1) as agent_card\n        FROM services s\n        WHERE s.visibility = 'public'::visibility\n          AND s.status = 'active'::service_status\n          AND ($1::text IS NULL OR s.name ILIKE $1 OR s.description ILIKE $1)\n        ORDER BY s.created_at DESC\n        LIMIT $2 OFFSET $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "provider_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "tags",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 7,
+        "name": "agent_card",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "4c92cd6cc3fee13d50d8d0a65babed0a16a8ff9e9f3c313f3b66c0db2e29aaaa"
+}

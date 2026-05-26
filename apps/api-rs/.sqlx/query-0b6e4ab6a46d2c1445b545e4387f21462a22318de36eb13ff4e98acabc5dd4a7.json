@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO services (organization_id, name, slug, description, provider_name, version, owner_user_id)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)\n        RETURNING id, slug",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "0b6e4ab6a46d2c1445b545e4387f21462a22318de36eb13ff4e98acabc5dd4a7"
+}

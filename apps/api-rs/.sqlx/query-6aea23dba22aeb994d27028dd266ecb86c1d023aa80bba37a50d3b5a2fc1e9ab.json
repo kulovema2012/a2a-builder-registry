@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE mcp_connections SET is_verified = FALSE WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6aea23dba22aeb994d27028dd266ecb86c1d023aa80bba37a50d3b5a2fc1e9ab"
+}

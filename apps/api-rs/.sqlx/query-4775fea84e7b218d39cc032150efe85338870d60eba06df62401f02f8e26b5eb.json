@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE services SET status = 'pending_review'::service_status, updated_at = now() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4775fea84e7b218d39cc032150efe85338870d60eba06df62401f02f8e26b5eb"
+}

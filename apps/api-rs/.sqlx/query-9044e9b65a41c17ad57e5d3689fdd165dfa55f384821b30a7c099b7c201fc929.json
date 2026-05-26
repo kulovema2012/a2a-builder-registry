@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO approval_requests (service_id, requested_by, notes)\n        VALUES ($1, $2, $3)\n        RETURNING id, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "9044e9b65a41c17ad57e5d3689fdd165dfa55f384821b30a7c099b7c201fc929"
+}

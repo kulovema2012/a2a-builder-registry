@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_card_snapshots (service_id, raw_json, normalized_json, checksum, fetched_at, created_by_run_id)\n            VALUES ($1, $2, $2, $3, now(), $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c909b4fa0016f102a451ed8d23a6f1bf6f43689414a0b6a261d15e8154d95b4e"
+}

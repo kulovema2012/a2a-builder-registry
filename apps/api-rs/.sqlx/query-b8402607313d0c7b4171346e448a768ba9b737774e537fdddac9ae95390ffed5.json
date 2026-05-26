@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, service_id, name, server_url, transport,\n            capabilities, auth_type, is_verified, verified_at, created_at\n        FROM mcp_connections WHERE service_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "service_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "server_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "transport",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "capabilities",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 6,
+        "name": "auth_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_verified",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "verified_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "b8402607313d0c7b4171346e448a768ba9b737774e537fdddac9ae95390ffed5"
+}

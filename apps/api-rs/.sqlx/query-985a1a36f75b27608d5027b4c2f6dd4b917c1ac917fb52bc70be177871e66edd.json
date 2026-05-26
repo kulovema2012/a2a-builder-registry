@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_card_snapshots (service_id, raw_json, normalized_json, schema_version, checksum)\n        VALUES ($1, $2, $2, '0.2', $3)\n        RETURNING id, service_id, raw_json, normalized_json, schema_version, checksum, fetched_at, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "service_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "raw_json",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 3,
+        "name": "normalized_json",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "schema_version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "checksum",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "fetched_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "985a1a36f75b27608d5027b4c2f6dd4b917c1ac917fb52bc70be177871e66edd"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE services SET current_snapshot_id = $1, updated_at = now() WHERE id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f58da4af6da73c3911b75f2c796a5fdddee023401b2665e5f7dbfb70905e2948"
+}

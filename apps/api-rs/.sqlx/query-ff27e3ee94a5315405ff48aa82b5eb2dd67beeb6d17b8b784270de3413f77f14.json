@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM mcp_connections WHERE id = $1 AND service_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ff27e3ee94a5315405ff48aa82b5eb2dd67beeb6d17b8b784270de3413f77f14"
+}

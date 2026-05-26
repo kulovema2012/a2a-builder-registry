@@ -1,0 +1,101 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE validation_runs SET\n            status = $1::validation_status,\n            score = $2,\n            checks = $3,\n            errors = $4,\n            warnings = $5,\n            response_time_ms = $6,\n            finished_at = now()\n        WHERE id = $7\n        RETURNING id, service_id, status::text, score, checks, errors, warnings,\n            response_time_ms, started_at, finished_at, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "service_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "score",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "checks",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "errors",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 6,
+        "name": "warnings",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "response_time_ms",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "started_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "finished_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "validation_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "running",
+                "passed",
+                "failed",
+                "warning"
+              ]
+            }
+          }
+        },
+        "Int4",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Int4",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "2e6bdeb45a9b7c5e1bd4ea85e33266e0ace9bb057d9d7198355bc09c26d87dad"
+}

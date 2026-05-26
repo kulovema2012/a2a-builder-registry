@@ -1,0 +1,156 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE services SET\n            name = COALESCE($1, name),\n            description = COALESCE($2, description),\n            provider_name = COALESCE($3, provider_name),\n            provider_url = COALESCE($4, provider_url),\n            visibility = COALESCE($5::visibility, visibility),\n            status = COALESCE($6::service_status, status),\n            version = COALESCE($7, version),\n            updated_at = now()\n        WHERE id = $8 AND organization_id = $9\n        RETURNING id, organization_id, name, slug, description, provider_name, provider_url,\n            visibility::text, status::text,\n            owner_user_id, current_snapshot_id, tags, icon_url, documentation_url,\n            version, delegates_to, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "provider_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "provider_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "visibility",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "owner_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "current_snapshot_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "tags",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 12,
+        "name": "icon_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "documentation_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "delegates_to",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 16,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 17,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "visibility",
+            "kind": {
+              "Enum": [
+                "draft",
+                "private",
+                "internal",
+                "public"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "service_status",
+            "kind": {
+              "Enum": [
+                "active",
+                "suspended",
+                "delisted",
+                "pending_review"
+              ]
+            }
+          }
+        },
+        "Varchar",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1661b038f98d86a3b4460aaafb8dacd1686ac56e31dc04aa7ed38d399c2351a9"
+}

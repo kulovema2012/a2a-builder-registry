@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, service_id, actor_id, event_type, metadata, created_at\n        FROM registry_events\n        WHERE ($1::uuid IS NULL OR service_id = $1)\n          AND ($2::text IS NULL OR event_type = $2)\n        ORDER BY created_at DESC\n        LIMIT $3 OFFSET $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "service_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "actor_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "event_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "metadata",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1696c3f47760e8bad7aaf7e366eebf296522b6f167342df3ca918d132090af41"
+}

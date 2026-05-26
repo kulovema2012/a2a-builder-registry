@@ -1,0 +1,125 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, organization_id, name, slug, description, provider_name, provider_url,\n            visibility::text as \"visibility!\", status::text as \"status!\",\n            owner_user_id, current_snapshot_id, tags, icon_url, documentation_url,\n            version, delegates_to, created_at, updated_at\n        FROM services WHERE id = $1 AND organization_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "provider_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "provider_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "visibility!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "status!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "owner_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "current_snapshot_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "tags",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 12,
+        "name": "icon_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "documentation_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "delegates_to",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 16,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 17,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a5804f60523ff40c588deddf74356052b9b70f3e2077b186705f745539e8567a"
+}

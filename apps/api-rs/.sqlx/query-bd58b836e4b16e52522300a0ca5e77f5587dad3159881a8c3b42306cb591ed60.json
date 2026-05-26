@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO validation_runs (service_id, status, started_at)\n        VALUES ($1, 'running'::validation_status, now())\n        RETURNING id, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "bd58b836e4b16e52522300a0ca5e77f5587dad3159881a8c3b42306cb591ed60"
+}

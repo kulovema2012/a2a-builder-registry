@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO organizations (name, slug) VALUES ($1, $2) RETURNING id, name, slug, plan, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "plan",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d4ce1331f55122527fc0c3a232776e42cf9eeaf9ce75eefad22273fc0f01adcb"
+}

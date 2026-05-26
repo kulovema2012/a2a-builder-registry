@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT server_url, transport FROM mcp_connections WHERE id = $1 AND service_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "server_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "transport",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "853d92dda24fee109148b87a49749be5f64af912bfcc950da14f65a65fb9c11e"
+}

@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name, description, external_skill_id as id, input_modes, output_modes FROM skills WHERE service_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "input_modes",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 4,
+        "name": "output_modes",
+        "type_info": "TextArray"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "f4f50944e2dcfcd96aff4aef2d0c9bd260acaa7511823ea57d4eb6f2caae1cac"
+}

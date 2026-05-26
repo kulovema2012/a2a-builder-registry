@@ -1,0 +1,146 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO services\n            (organization_id, name, slug, description, provider_name, provider_url,\n             visibility, tags, version, delegates_to, owner_user_id)\n        VALUES ($1, $2, $3, $4, $5, $6, $7::visibility, $8, $9, $10, $11)\n        RETURNING id, organization_id, name, slug, description, provider_name, provider_url,\n            visibility::text, status::text,\n            owner_user_id, current_snapshot_id, tags, icon_url, documentation_url,\n            version, delegates_to, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "slug",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "provider_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "provider_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "visibility",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "owner_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "current_snapshot_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "tags",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 12,
+        "name": "icon_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "documentation_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "version",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "delegates_to",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 16,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 17,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "visibility",
+            "kind": {
+              "Enum": [
+                "draft",
+                "private",
+                "internal",
+                "public"
+              ]
+            }
+          }
+        },
+        "TextArray",
+        "Varchar",
+        "TextArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0c359fce43743d314a30ab05ebfc3c53b8fd56cbadab823f2c44fe60721ce874"
+}

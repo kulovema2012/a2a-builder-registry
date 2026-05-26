@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE services SET status = 'active'::service_status, visibility = 'public'::visibility, updated_at = now()\n        WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "26e1e54115e70847b96e7ee1a8d0ec642822e28237af124e8e078ef30e20c389"
+}

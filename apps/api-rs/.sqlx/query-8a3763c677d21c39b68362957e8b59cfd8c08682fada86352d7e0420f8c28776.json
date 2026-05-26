@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT base_url FROM service_endpoints\n        WHERE service_id = $1 AND is_preferred = TRUE\n        ORDER BY created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "base_url",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "8a3763c677d21c39b68362957e8b59cfd8c08682fada86352d7e0420f8c28776"
+}

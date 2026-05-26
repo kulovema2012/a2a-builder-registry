@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE service_endpoints SET is_preferred = FALSE WHERE service_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "afa96b648101a0176ed71481ff44056909ecb0ed9e43bb1834b038bdfe43738e"
+}
