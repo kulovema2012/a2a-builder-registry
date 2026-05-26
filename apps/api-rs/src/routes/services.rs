@@ -20,35 +20,35 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/services", post(create_service).get(list_services))
         .route(
-            "/api/v1/services/:id",
+            "/api/v1/services/{id}",
             get(get_service).patch(update_service).delete(delete_service),
         )
         .route(
-            "/api/v1/services/:id/endpoints",
+            "/api/v1/services/{id}/endpoints",
             get(list_endpoints).post(add_endpoint),
         )
         .route(
-            "/api/v1/services/:id/endpoints/:endpoint_id",
+            "/api/v1/services/{id}/endpoints/{endpoint_id}",
             delete(delete_endpoint),
         )
         .route(
-            "/api/v1/services/:id/skills",
+            "/api/v1/services/{id}/skills",
             get(list_skills).post(add_skill),
         )
         .route(
-            "/api/v1/services/:id/skills/:skill_id",
+            "/api/v1/services/{id}/skills/{skill_id}",
             delete(delete_skill),
         )
-        .route("/api/v1/services/:id/validate", post(trigger_validation))
+        .route("/api/v1/services/{id}/validate", post(trigger_validation))
         .route(
-            "/api/v1/services/:id/validation-runs",
+            "/api/v1/services/{id}/validation-runs",
             get(list_validation_runs),
         )
         .route(
-            "/api/v1/services/:id/agent-card/generate",
+            "/api/v1/services/{id}/agent-card/generate",
             post(generate_agent_card),
         )
-        .route("/api/v1/services/:id/agent-card", get(get_agent_card))
+        .route("/api/v1/services/{id}/agent-card", get(get_agent_card))
 }
 
 // --- Column specs with enum/timestamp casts ---
@@ -129,7 +129,7 @@ async fn create_service(
     auth: AuthUser,
     Json(body): Json<CreateServiceRequest>,
 ) -> AppResult<(StatusCode, Json<Value>)> {
-    let visibility = body.visibility.as_deref().unwrap_or("DRAFT");
+    let visibility = body.visibility.as_deref().unwrap_or("draft").to_lowercase();
     let tags = body.tags.unwrap_or_default();
     let delegates_to = body.delegates_to.unwrap_or_default();
     let version = body.version.unwrap_or_else(|| "1.0.0".to_string());
@@ -137,7 +137,7 @@ async fn create_service(
     let sql = format!(
         "INSERT INTO services (organization_id, name, slug, description, provider_name, provider_url,
                               visibility, tags, version, delegates_to, owner_user_id)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::visibility, $8, $9, $10, $11)
          RETURNING {SVC_COLS}"
     );
     let row = sqlx::query(&sql)
@@ -237,7 +237,7 @@ async fn update_service(
              provider_name = COALESCE($5, provider_name),
              provider_url = COALESCE($6, provider_url),
              visibility = CASE WHEN $7 IS NOT NULL THEN $7::visibility ELSE visibility END,
-             status = CASE WHEN $8 IS NOT NULL THEN $8::servicestatus ELSE status END,
+             status = CASE WHEN $8 IS NOT NULL THEN $8::service_status ELSE status END,
              tags = COALESCE($9, tags),
              version = COALESCE($10, version),
              delegates_to = COALESCE($11, delegates_to),
@@ -313,7 +313,7 @@ async fn add_endpoint(
 
     let sql = format!(
         "INSERT INTO service_endpoints (service_id, agent_card_url, base_url, protocol_binding, protocol_version, tenant, is_preferred)
-         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING {EP_COLS}"
+         VALUES ($1, $2, $3, $4::protocol_binding, $5, $6, $7) RETURNING {EP_COLS}"
     );
     let row = sqlx::query(&sql)
         .bind(id)
@@ -439,7 +439,7 @@ async fn trigger_validation(
     let started_at = Utc::now();
 
     sqlx::query(
-        "INSERT INTO validation_runs (id, service_id, status, started_at) VALUES ($1, $2, 'RUNNING', $3)",
+        "INSERT INTO validation_runs (id, service_id, status, started_at) VALUES ($1, $2, 'running'::validation_status, $3)",
     )
     .bind(run_id)
     .bind(id)
@@ -481,11 +481,11 @@ async fn trigger_validation(
             .await;
 
         let status = if result.checks.iter().any(|c| c.status == "failed") {
-            "FAILED"
+            "failed"
         } else if result.checks.iter().any(|c| c.status == "warning") {
-            "WARNING"
+            "warning"
         } else {
-            "PASSED"
+            "passed"
         };
         let checks_json = serde_json::to_value(&result.checks).unwrap_or_default();
         let errors_json = serde_json::to_value(
@@ -506,7 +506,7 @@ async fn trigger_validation(
         .unwrap_or_default();
 
         let _ = sqlx::query(
-            "UPDATE validation_runs SET status = $2, score = $3,
+            "UPDATE validation_runs SET status = $2::validation_status, score = $3,
              checks = $4, errors = $5, warnings = $6, finished_at = now() WHERE id = $1",
         )
         .bind(run_id)
@@ -518,7 +518,7 @@ async fn trigger_validation(
         .execute(&pool)
         .await;
 
-        let event_type = if status == "PASSED" {
+        let event_type = if status == "passed" {
             "validation.passed"
         } else {
             "validation.failed"
