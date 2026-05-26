@@ -9,7 +9,14 @@ node_modules/
 
 # AI tooling — transient artefacts only (rules/CLAUDE.md are committed)
 .claude/checkpoints/
+.claude/worktrees/
 docs/superpowers/
+
+# Browser automation
+.playwright-mcp/
+
+# Session transcripts
+a2a-builder-processing.txt
 
 # IDE
 .vscode/

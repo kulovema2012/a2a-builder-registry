@@ -336,14 +336,17 @@ Base prefix: `/api/v1`
 
 | Route | Component | Type |
 |---|---|---|
-| `/` | `app/page.tsx` | RSC (dashboard) |
-| `/services` | `app/services/page.tsx` | RSC (list) |
-| `/services/[id]` | `app/services/[id]/page.tsx` | RSC (detail) |
-| `/services/import` | `app/services/import/page.tsx` | RSC (import form) |
+| `/` | `app/page.tsx` | RSC (registry / agent discovery) |
+| `/services` | `app/services/page.tsx` | RSC (your services list) |
+| `/services/[id]` | `app/services/[id]/page.tsx` | RSC (service detail + MCP tab) |
+| `/services/import` | `app/services/import/page.tsx` | RSC (import from URL) |
 | `/builder` | `app/builder/page.tsx` | RSC (agent card builder) |
-| `/registry` | `app/registry/page.tsx` | RSC (discovery browser) |
-| `/console` | `app/console/page.tsx` | Client component (interactive console) |
-| `/admin` | `app/admin/page.tsx` | RSC (approval queue) |
+| `/console` | `app/console/page.tsx` | Client (interactive A2A test console) |
+| `/activity` | `app/activity/page.tsx` | RSC (audit event feed) |
+| `/approvals` | `app/approvals/page.tsx` | RSC (approval queue) |
+| `/admin` | `app/admin/page.tsx` | RSC (admin approval management) |
+| `/login` | `app/login/page.tsx` | Client (auth form) |
+| `/register` | `app/register/page.tsx` | Client (auth form) |
 
 ---
 
@@ -408,22 +411,39 @@ validate_card(card_data) →
 
 ## Authentication Flow
 
-Current implementation uses JWT via `jsonwebtoken` crate:
+Dual-token pattern (OWASP best practice) via `jsonwebtoken` + `argon2`:
 
 ```
+POST /auth/register { name, email, password }
+  → argon2id::hash(password)
+  → INSERT INTO organizations + users (transaction)
+  → Issue access token (15 min) + refresh token (7 days, httpOnly cookie)
+
 POST /auth/login { email, password }
   → SELECT users WHERE email=$1
   → argon2::verify(password, user.password_hash)
-  → jsonwebtoken::encode({ sub: user.id, org: org_id, role: role }, JWT_SECRET, HS256)
-  → Return { access_token, token_type: "bearer" }
+  → jsonwebtoken::encode({ sub, org, role, iat, exp }, JWT_SECRET, HS256)
+  → Return { access_token } + Set-Cookie: refresh_token (httpOnly, SameSite=Strict)
+
+POST /auth/refresh
+  → Read httpOnly refresh token cookie
+  → Verify hash against refresh_tokens table
+  → Revoke old token, issue new refresh token (rotation)
+  → Return new access_token
+
+POST /auth/logout
+  → Revoke refresh token in DB → session invalidated on all devices
 
 Protected routes:
-  → Authorization: Bearer <token>
-  → jsonwebtoken::decode(token, JWT_SECRET) → claims
-  → Auth middleware extracts current_user from Axum State
-```
+  → Authorization: Bearer <access_token>
+  → jsonwebtoken::decode(token, JWT_SECRET) → Claims { sub, org, role }
+  → AuthUser extractor injects user_id/org_id/role into handlers
 
-> Note: Auth is partially stubbed. `create_service` uses hardcoded `organization_id = "00000000-0000-0000-0000-000000000001"`. Full auth integration is pending.
+Frontend:
+  → AuthContext holds access_token in memory only (never localStorage)
+  → apiFetch auto-attaches Bearer header; on 401 → refresh once → retry
+  → Refresh token cookie sent automatically by browser (httpOnly)
+```
 
 ---
 
