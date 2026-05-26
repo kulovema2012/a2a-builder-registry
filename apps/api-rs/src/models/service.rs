@@ -113,6 +113,7 @@ pub struct CreateSkillRequest {
 }
 
 #[derive(Debug, Deserialize, Default)]
+#[allow(dead_code)]
 pub struct ServiceListParams {
     pub q: Option<String>,
     pub visibility: Option<String>,

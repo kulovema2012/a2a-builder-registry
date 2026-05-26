@@ -26,6 +26,7 @@ pub fn router() -> Router<AppState> {
 }
 
 #[derive(Deserialize, Default)]
+#[allow(dead_code)]
 pub struct RegistryListParams {
     pub q: Option<String>,
     pub tags: Option<String>,

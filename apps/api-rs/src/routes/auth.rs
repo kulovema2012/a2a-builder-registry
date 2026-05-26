@@ -87,7 +87,7 @@ async fn register(
         &state.config.jwt_secret,
         state.config.jwt_access_ttl,
     )
-    .map_err(|e| AppError::Internal(e))?;
+    .map_err(AppError::Internal)?;
 
     let refresh_token = generate_refresh_token();
     let token_hash = hash_refresh_token(&refresh_token);
@@ -154,7 +154,7 @@ async fn login(
         &state.config.jwt_secret,
         state.config.jwt_access_ttl,
     )
-    .map_err(|e| AppError::Internal(e))?;
+    .map_err(AppError::Internal)?;
 
     let refresh_token = generate_refresh_token();
     let token_hash = hash_refresh_token(&refresh_token);
@@ -242,7 +242,7 @@ async fn refresh(
         &state.config.jwt_secret,
         state.config.jwt_access_ttl,
     )
-    .map_err(|e| AppError::Internal(e))?;
+    .map_err(AppError::Internal)?;
 
     let new_refresh = generate_refresh_token();
     let new_hash = hash_refresh_token(&new_refresh);

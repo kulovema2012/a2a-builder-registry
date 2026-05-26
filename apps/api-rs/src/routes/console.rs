@@ -15,6 +15,7 @@ pub fn router() -> Router<AppState> {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct TestSendRequest {
     pub service_id: Uuid,
     pub skill_id: Option<String>,

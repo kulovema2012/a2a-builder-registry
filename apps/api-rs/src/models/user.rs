@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
+#[allow(dead_code)]
 pub struct User {
     pub id: Uuid,
     pub organization_id: Uuid,

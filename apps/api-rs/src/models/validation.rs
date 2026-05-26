@@ -29,6 +29,7 @@ pub struct RegistryEvent {
 }
 
 #[derive(Debug, Deserialize, Default)]
+#[allow(dead_code)]
 pub struct EventListParams {
     pub service_id: Option<Uuid>,
     pub event_type: Option<String>,
