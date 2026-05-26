@@ -18,15 +18,15 @@ use crate::{
 pub fn router() -> Router<AppState> {
     Router::new()
         .route(
-            "/api/v1/services/:id/mcp-connections",
+            "/api/v1/services/{id}/mcp-connections",
             get(list_mcp).post(add_mcp),
         )
         .route(
-            "/api/v1/services/:id/mcp-connections/:conn_id",
+            "/api/v1/services/{id}/mcp-connections/{conn_id}",
             delete(delete_mcp),
         )
         .route(
-            "/api/v1/services/:id/mcp-connections/:conn_id/verify",
+            "/api/v1/services/{id}/mcp-connections/{conn_id}/verify",
             post(verify_mcp),
         )
 }

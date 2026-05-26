@@ -17,8 +17,8 @@ use crate::{
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/registry/agents", get(list_agents))
-        .route("/api/v1/registry/agents/:id", get(get_agent))
-        .route("/api/v1/registry/services/:id/publish-request", post(publish_request))
+        .route("/api/v1/registry/agents/{id}", get(get_agent))
+        .route("/api/v1/registry/services/{id}/publish-request", post(publish_request))
         .route("/api/v1/registry/events", get(list_events))
 }
 

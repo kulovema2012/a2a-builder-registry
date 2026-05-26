@@ -15,8 +15,8 @@ use crate::{
 
 pub fn router() -> Router<AppState> {
     Router::new()
-        .route("/api/v1/admin/services/:id/approve", post(approve_service))
-        .route("/api/v1/admin/services/:id/suspend", post(suspend_service))
+        .route("/api/v1/admin/services/{id}/approve", post(approve_service))
+        .route("/api/v1/admin/services/{id}/suspend", post(suspend_service))
         .route("/api/v1/admin/services", get(list_pending))
 }
 
