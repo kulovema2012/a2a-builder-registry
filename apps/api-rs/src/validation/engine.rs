@@ -204,9 +204,7 @@ impl ValidationEngine {
             .iter()
             .filter(|c| c.level == "error" && c.status == "passed")
             .count();
-        let base_score = (passed_errors * 80)
-            .checked_div(error_checks)
-            .unwrap_or(80) as i32;
+        let base_score = (passed_errors * 80).checked_div(error_checks).unwrap_or(80) as i32;
         let mcp_bonus = (mcp_verified_count * 4).min(20);
         let score = (base_score + mcp_bonus).min(100);
 
