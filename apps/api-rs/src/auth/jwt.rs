@@ -38,7 +38,11 @@ pub fn encode_access_token(
 pub fn decode_token(token: &str, secret: &str) -> anyhow::Result<Claims> {
     let mut validation = Validation::new(Algorithm::HS256);
     validation.leeway = 0;
-    let data = decode::<Claims>(token, &DecodingKey::from_secret(secret.as_bytes()), &validation)?;
+    let data = decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(secret.as_bytes()),
+        &validation,
+    )?;
     Ok(data.claims)
 }
 
