@@ -45,9 +45,9 @@ async fn import_from_url(
         .await
         .map_err(|e| AppError::UnprocessableEntity(format!("Agent card is not valid JSON: {e}")))?;
 
-    let name = card["name"]
-        .as_str()
-        .ok_or_else(|| AppError::UnprocessableEntity("Agent card missing 'name' field".to_string()))?;
+    let name = card["name"].as_str().ok_or_else(|| {
+        AppError::UnprocessableEntity("Agent card missing 'name' field".to_string())
+    })?;
     let description = card["description"].as_str().map(String::from);
     let slug = name.to_lowercase().replace(' ', "-");
     let version = card["version"].as_str().unwrap_or("1.0.0");
@@ -94,13 +94,11 @@ async fn import_from_url(
     .await?;
     let snapshot_id: Uuid = snap_row.get("id");
 
-    sqlx::query(
-        "UPDATE services SET current_snapshot_id = $1 WHERE id = $2",
-    )
-    .bind(snapshot_id)
-    .bind(service_id)
-    .execute(&mut *tx)
-    .await?;
+    sqlx::query("UPDATE services SET current_snapshot_id = $1 WHERE id = $2")
+        .bind(snapshot_id)
+        .bind(service_id)
+        .execute(&mut *tx)
+        .await?;
 
     if let Some(url) = card["url"].as_str() {
         sqlx::query(

@@ -95,7 +95,11 @@ async fn approve_service(
     let (new_visibility, new_status, approval_status) = match body.action.as_str() {
         "approve" => ("public", "active", "approved"),
         "reject" => ("draft", "active", "rejected"),
-        _ => return Err(AppError::UnprocessableEntity("action must be 'approve' or 'reject'".to_string())),
+        _ => {
+            return Err(AppError::UnprocessableEntity(
+                "action must be 'approve' or 'reject'".to_string(),
+            ))
+        }
     };
 
     sqlx::query(
@@ -118,7 +122,11 @@ async fn approve_service(
     .execute(&state.pool)
     .await?;
 
-    let event_type = if body.action == "approve" { "approval.approved" } else { "approval.rejected" };
+    let event_type = if body.action == "approve" {
+        "approval.approved"
+    } else {
+        "approval.rejected"
+    };
     sqlx::query(
         "INSERT INTO registry_events (service_id, actor_id, event_type, metadata)
          VALUES ($1, $2, $3, $4)",
@@ -130,7 +138,9 @@ async fn approve_service(
     .execute(&state.pool)
     .await?;
 
-    Ok(Json(json!({ "service_id": id, "action": body.action, "status": new_visibility })))
+    Ok(Json(
+        json!({ "service_id": id, "action": body.action, "status": new_visibility }),
+    ))
 }
 
 async fn suspend_service(

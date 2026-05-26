@@ -49,6 +49,9 @@ mod tests {
     #[tokio::test]
     async fn test_probe_stdio_always_false() {
         let result = probe_mcp_server("stdio://any", "stdio", 5).await;
-        assert!(!result, "stdio transport must always return false from probe");
+        assert!(
+            !result,
+            "stdio transport must always return false from probe"
+        );
     }
 }

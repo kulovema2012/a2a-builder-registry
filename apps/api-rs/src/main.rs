@@ -8,11 +8,11 @@ mod routes;
 mod validation;
 
 use axum::Router;
-use tower_http::cors::CorsLayer;
-use tower_http::cors::AllowOrigin;
-use tower_http::cors::AllowMethods;
-use tower_http::cors::AllowHeaders;
 use http::Method;
+use tower_http::cors::AllowHeaders;
+use tower_http::cors::AllowMethods;
+use tower_http::cors::AllowOrigin;
+use tower_http::cors::CorsLayer;
 
 use crate::auth::middleware::AppState;
 use crate::config::Config;

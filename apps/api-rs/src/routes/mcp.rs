@@ -90,13 +90,11 @@ async fn delete_mcp(
     _auth: AuthUser,
     Path((service_id, conn_id)): Path<(Uuid, Uuid)>,
 ) -> AppResult<StatusCode> {
-    sqlx::query(
-        "DELETE FROM mcp_connections WHERE id = $1 AND service_id = $2",
-    )
-    .bind(conn_id)
-    .bind(service_id)
-    .execute(&state.pool)
-    .await?;
+    sqlx::query("DELETE FROM mcp_connections WHERE id = $1 AND service_id = $2")
+        .bind(conn_id)
+        .bind(service_id)
+        .execute(&state.pool)
+        .await?;
     Ok(StatusCode::NO_CONTENT)
 }
 

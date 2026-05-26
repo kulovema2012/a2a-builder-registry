@@ -139,7 +139,11 @@ impl ValidationEngine {
                 .ok()
                 .map(|c| async move { c.get(&well_known).send().await.is_ok() });
 
-            let ok = if let Some(fut) = reachable { fut.await } else { false };
+            let ok = if let Some(fut) = reachable {
+                fut.await
+            } else {
+                false
+            };
             checks.push(ValidationCheck {
                 name: "endpoint_reachable".to_string(),
                 status: if ok { "passed" } else { "warning" }.to_string(),

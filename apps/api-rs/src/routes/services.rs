@@ -21,7 +21,9 @@ pub fn router() -> Router<AppState> {
         .route("/api/v1/services", post(create_service).get(list_services))
         .route(
             "/api/v1/services/{id}",
-            get(get_service).patch(update_service).delete(delete_service),
+            get(get_service)
+                .patch(update_service)
+                .delete(delete_service),
         )
         .route(
             "/api/v1/services/{id}/endpoints",
@@ -290,12 +292,10 @@ async fn list_endpoints(
 ) -> AppResult<Json<Value>> {
     ensure_service_belongs_to_org(&state.pool, id, auth.org_id).await?;
 
-    let sql =
-        format!("SELECT {EP_COLS} FROM service_endpoints WHERE service_id = $1 ORDER BY is_preferred DESC");
-    let rows = sqlx::query(&sql)
-        .bind(id)
-        .fetch_all(&state.pool)
-        .await?;
+    let sql = format!(
+        "SELECT {EP_COLS} FROM service_endpoints WHERE service_id = $1 ORDER BY is_preferred DESC"
+    );
+    let rows = sqlx::query(&sql).bind(id).fetch_all(&state.pool).await?;
     let endpoints: Vec<Value> = rows.iter().map(ep_json).collect();
     Ok(Json(json!({ "endpoints": endpoints })))
 }
@@ -352,11 +352,9 @@ async fn list_skills(
 ) -> AppResult<Json<Value>> {
     ensure_service_belongs_to_org(&state.pool, id, auth.org_id).await?;
 
-    let sql = format!("SELECT {SKILL_COLS} FROM skills WHERE service_id = $1 ORDER BY created_at ASC");
-    let rows = sqlx::query(&sql)
-        .bind(id)
-        .fetch_all(&state.pool)
-        .await?;
+    let sql =
+        format!("SELECT {SKILL_COLS} FROM skills WHERE service_id = $1 ORDER BY created_at ASC");
+    let rows = sqlx::query(&sql).bind(id).fetch_all(&state.pool).await?;
     let skills: Vec<Value> = rows.iter().map(skill_json).collect();
     Ok(Json(json!({ "skills": skills })))
 }
@@ -414,26 +412,23 @@ async fn trigger_validation(
 ) -> AppResult<Json<Value>> {
     ensure_service_belongs_to_org(&state.pool, id, auth.org_id).await?;
 
-    let svc_row = sqlx::query(
-        "SELECT name, slug, description, provider_url FROM services WHERE id = $1",
-    )
-    .bind(id)
-    .fetch_one(&state.pool)
-    .await?;
+    let svc_row =
+        sqlx::query("SELECT name, slug, description, provider_url FROM services WHERE id = $1")
+            .bind(id)
+            .fetch_one(&state.pool)
+            .await?;
 
-    let ep_rows = sqlx::query(
-        "SELECT agent_card_url, base_url FROM service_endpoints WHERE service_id = $1",
-    )
-    .bind(id)
-    .fetch_all(&state.pool)
-    .await?;
+    let ep_rows =
+        sqlx::query("SELECT agent_card_url, base_url FROM service_endpoints WHERE service_id = $1")
+            .bind(id)
+            .fetch_all(&state.pool)
+            .await?;
 
-    let mcp_rows = sqlx::query(
-        "SELECT server_url, transport FROM mcp_connections WHERE service_id = $1",
-    )
-    .bind(id)
-    .fetch_all(&state.pool)
-    .await?;
+    let mcp_rows =
+        sqlx::query("SELECT server_url, transport FROM mcp_connections WHERE service_id = $1")
+            .bind(id)
+            .fetch_all(&state.pool)
+            .await?;
 
     let run_id = Uuid::new_v4();
     let started_at = Utc::now();
@@ -534,7 +529,9 @@ async fn trigger_validation(
         .await;
     });
 
-    Ok(Json(json!({ "run_id": run_id, "status": "running", "message": "Validation started" })))
+    Ok(Json(
+        json!({ "run_id": run_id, "status": "running", "message": "Validation started" }),
+    ))
 }
 
 async fn list_validation_runs(
@@ -590,10 +587,7 @@ async fn generate_agent_card(
         .ok_or_else(|| AppError::NotFound(format!("Service {id} not found")))?;
 
     let ep_sql = format!("SELECT {EP_COLS} FROM service_endpoints WHERE service_id = $1");
-    let ep_rows = sqlx::query(&ep_sql)
-        .bind(id)
-        .fetch_all(&state.pool)
-        .await?;
+    let ep_rows = sqlx::query(&ep_sql).bind(id).fetch_all(&state.pool).await?;
 
     let skill_sql = format!("SELECT {SKILL_COLS} FROM skills WHERE service_id = $1");
     let skill_rows = sqlx::query(&skill_sql)
@@ -699,16 +693,17 @@ pub async fn ensure_service_belongs_to_org(
     service_id: Uuid,
     org_id: Uuid,
 ) -> AppResult<()> {
-    let row = sqlx::query(
-        "SELECT 1 as exists_flag FROM services WHERE id = $1 AND organization_id = $2",
-    )
-    .bind(service_id)
-    .bind(org_id)
-    .fetch_optional(pool)
-    .await?;
+    let row =
+        sqlx::query("SELECT 1 as exists_flag FROM services WHERE id = $1 AND organization_id = $2")
+            .bind(service_id)
+            .bind(org_id)
+            .fetch_optional(pool)
+            .await?;
 
     if row.is_none() {
-        return Err(AppError::NotFound(format!("Service {service_id} not found")));
+        return Err(AppError::NotFound(format!(
+            "Service {service_id} not found"
+        )));
     }
     Ok(())
 }

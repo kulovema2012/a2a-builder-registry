@@ -1,14 +1,14 @@
-pub mod health;
+pub mod admin;
 pub mod auth;
-pub mod services;
+pub mod console;
+pub mod health;
+pub mod import;
 pub mod mcp;
 pub mod registry;
-pub mod import;
-pub mod console;
-pub mod admin;
+pub mod services;
 
-use axum::Router;
 use crate::auth::middleware::AppState;
+use axum::Router;
 
 pub fn router() -> Router<AppState> {
     Router::new()

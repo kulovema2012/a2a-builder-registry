@@ -92,14 +92,16 @@ mod tests {
 
     #[test]
     fn test_expired_token_fails_decode() {
-        let token = encode_access_token(Uuid::new_v4(), Uuid::new_v4(), "member", SECRET, -1).unwrap();
+        let token =
+            encode_access_token(Uuid::new_v4(), Uuid::new_v4(), "member", SECRET, -1).unwrap();
         let result = decode_token(&token, SECRET);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_wrong_secret_fails_decode() {
-        let token = encode_access_token(Uuid::new_v4(), Uuid::new_v4(), "member", SECRET, 900).unwrap();
+        let token =
+            encode_access_token(Uuid::new_v4(), Uuid::new_v4(), "member", SECRET, 900).unwrap();
         let result = decode_token(&token, "wrong-secret-wrong-secret-wrong-secret");
         assert!(result.is_err());
     }

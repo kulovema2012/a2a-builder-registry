@@ -18,7 +18,10 @@ pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/v1/registry/agents", get(list_agents))
         .route("/api/v1/registry/agents/{id}", get(get_agent))
-        .route("/api/v1/registry/services/{id}/publish-request", post(publish_request))
+        .route(
+            "/api/v1/registry/services/{id}/publish-request",
+            post(publish_request),
+        )
         .route("/api/v1/registry/events", get(list_events))
 }
 
@@ -85,10 +88,7 @@ async fn list_agents(
     Ok(Json(json!({ "agents": result, "page": page })))
 }
 
-async fn get_agent(
-    State(state): State<AppState>,
-    Path(id): Path<Uuid>,
-) -> AppResult<Json<Value>> {
+async fn get_agent(State(state): State<AppState>, Path(id): Path<Uuid>) -> AppResult<Json<Value>> {
     let row = sqlx::query(
         r#"SELECT s.id, s.name, s.slug, s.description, s.provider_name, s.provider_url,
                   s.tags, s.version, s.delegates_to,
@@ -147,7 +147,10 @@ async fn publish_request(
     .await?;
 
     let req_id: Uuid = row.get("id");
-    Ok((StatusCode::CREATED, Json(json!({ "id": req_id, "status": "pending" }))))
+    Ok((
+        StatusCode::CREATED,
+        Json(json!({ "id": req_id, "status": "pending" })),
+    ))
 }
 
 #[derive(Deserialize, Default)]

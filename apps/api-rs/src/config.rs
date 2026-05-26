@@ -55,12 +55,18 @@ mod tests {
         env::remove_var("__TEST_MISSING_VAR");
         let result = required("__TEST_MISSING_VAR");
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("__TEST_MISSING_VAR"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("__TEST_MISSING_VAR"));
     }
 
     #[test]
     fn test_cors_origins_parses_multiple() {
-        env::set_var("CORS_ORIGINS", "http://localhost:3000, http://localhost:3001");
+        env::set_var(
+            "CORS_ORIGINS",
+            "http://localhost:3000, http://localhost:3001",
+        );
         env::set_var("DATABASE_URL", "postgresql://x");
         env::set_var("JWT_SECRET", "a".repeat(32));
         let cfg = Config::from_env().unwrap();
