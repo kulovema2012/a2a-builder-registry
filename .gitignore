@@ -1,18 +1,15 @@
 # Dependencies
 node_modules/
-__pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-dist/
-build/
-.eggs/
 
 # Environment
 .env
 .env.local
 .env.*.local
 *.pem
+
+# AI tooling — transient artefacts only (rules/CLAUDE.md are committed)
+.claude/checkpoints/
+docs/superpowers/
 
 # IDE
 .vscode/
@@ -29,10 +26,8 @@ Thumbs.db
 apps/web/.next/
 apps/web/out/
 
-# Python
-apps/api/.venv/
-apps/api/venv/
-apps/api/*.db
+# Rust
+apps/api-rs/target/
 
 # Database
 *.sqlite3
@@ -42,9 +37,6 @@ pgdata/
 docker-compose.override.yml
 
 # Testing
-.coverage
-htmlcov/
-.pytest_cache/
 test-results/
 
 # Build

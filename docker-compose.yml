@@ -15,32 +15,36 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
+  api-rs:
     build:
-      context: ./apps/api
+      context: ./apps/api-rs
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://a2a:a2asecret@postgres:5432/a2a_registry
+      DATABASE_URL: postgresql://a2a:a2asecret@postgres:5432/a2a_registry
+      JWT_SECRET: change-me-to-a-random-32-char-minimum-secret
+      JWT_ACCESS_TTL_SECONDS: 900
+      JWT_REFRESH_TTL_SECONDS: 604800
       CORS_ORIGINS: http://localhost:3000
-      AGENT_CARD_FETCH_TIMEOUT: 10
+      AGENT_CARD_FETCH_TIMEOUT_SECS: 10
+      MCP_PROBE_TIMEOUT_SECS: 5
+      PORT: 8000
+      RUST_LOG: info
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./apps/api/app:/app/app
 
   web:
     build:
       context: ./apps/web
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
     depends_on:
-      - api
+      - api-rs
     volumes:
       - ./apps/web/src:/app/src
       - ./apps/web/public:/app/public
