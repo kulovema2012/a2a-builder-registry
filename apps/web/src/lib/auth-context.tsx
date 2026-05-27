@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { auth, api, clearToken, type UserPublic } from "./api";
+import { auth, clearToken, type UserPublic } from "./api";
 
 interface AuthCtx {
   user: UserPublic | null;
@@ -30,25 +30,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    api
-      .health()
-      .then(() => {
-        // Token exists — reconstruct minimal user from JWT claims
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setUser({
-            id: payload.sub ?? "",
-            name: payload.name ?? "",
-            email: payload.email ?? "",
-            role: payload.role ?? "member",
-            org_id: payload.org ?? "",
-          });
-        } catch {
-          clearToken();
-        }
-      })
-      .catch(() => clearToken())
-      .finally(() => setLoading(false));
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        clearToken();
+      } else {
+        setUser({
+          id: payload.sub ?? "",
+          name: payload.name ?? "",
+          email: payload.email ?? "",
+          role: payload.role ?? "member",
+          org_id: payload.org ?? "",
+        });
+      }
+    } catch {
+      clearToken();
+    }
+    setLoading(false);
   }, []);
 
   const loginFn = useCallback(async (email: string, password: string) => {

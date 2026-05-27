@@ -204,7 +204,9 @@ export const auth = {
 };
 
 export const api = {
-  health: () => apiFetch<{ status: string; version: string; database: string }>("/health"),
+  health: () =>
+    fetch(`${API_URL}/health`)
+      .then((r) => { if (!r.ok) throw new Error("health failed"); return r.json() as Promise<{ status: string; version: string; database: string }>; }),
 
   // Services
   createService: (data: Partial<Service>) =>
