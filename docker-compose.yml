@@ -26,7 +26,7 @@ services:
       JWT_SECRET: change-me-to-a-random-32-char-minimum-secret
       JWT_ACCESS_TTL_SECONDS: 900
       JWT_REFRESH_TTL_SECONDS: 604800
-      CORS_ORIGINS: http://localhost:3000
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
       AGENT_CARD_FETCH_TIMEOUT_SECS: 10
       MCP_PROBE_TIMEOUT_SECS: 5
       PORT: 8000
