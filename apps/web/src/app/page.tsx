@@ -79,8 +79,8 @@ function AgentCard({ agent }: { agent: RegistryAgent }) {
   const card = extractCard(agent.agentCard);
   return (
     <div className="agent-card" role="button" tabIndex={0}
-      onClick={() => router.push(`/services/${agent.id}`)}
-      onKeyDown={(e) => { if (e.key === "Enter") router.push(`/services/${agent.id}`); }}>
+      onClick={() => router.push(`/registry/${agent.id}`)}
+      onKeyDown={(e) => { if (e.key === "Enter") router.push(`/registry/${agent.id}`); }}>
       <div className="agent-card-head">
         <AgentMark name={agent.name} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -118,7 +118,7 @@ function AgentRow({ agent }: { agent: RegistryAgent }) {
   const router = useRouter();
   const card = extractCard(agent.agentCard);
   return (
-    <button className="agent-row" onClick={() => router.push(`/services/${agent.id}`)}>
+    <button className="agent-row" onClick={() => router.push(`/registry/${agent.id}`)}>
       <div className="agent-row-name">
         <AgentMark name={agent.name} size={28} />
         <div>
