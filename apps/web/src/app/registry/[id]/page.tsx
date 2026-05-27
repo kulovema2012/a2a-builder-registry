@@ -106,9 +106,16 @@ export default function RegistryAgentPage() {
           {agent.provider.organization && (
             <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
               by {agent.provider.organization}
-              {agent.provider.url && (
-                <> · <a href={agent.provider.url} target="_blank" rel="noopener noreferrer" className="link">{agent.provider.url}</a></>
-              )}
+              {(() => {
+                if (!agent.provider.url) return null;
+                try {
+                  const u = new URL(agent.provider.url);
+                  if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+                  return <> · <a href={u.toString()} target="_blank" rel="noopener noreferrer" className="link">{u.toString()}</a></>;
+                } catch {
+                  return null;
+                }
+              })()}
             </div>
           )}
           {agent.description && <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.6 }}>{agent.description}</p>}
