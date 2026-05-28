@@ -122,17 +122,44 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
+  const [rawBody, setRawBody] = useState("");
+  const [repairing, setRepairing] = useState(false);
+  const [repairedJson, setRepairedJson] = useState("");
 
   const handleImport = async () => {
     if (!importUrl.trim()) return;
     setImporting(true);
     setImportError("");
+    setRawBody("");
+    setRepairedJson("");
     try {
       onImport(importUrl.trim());
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : "Import failed");
+      const msg = err instanceof Error ? err.message : "Import failed";
+      setImportError(msg);
+      try {
+        const res = await fetch(importUrl.trim());
+        const text = await res.text();
+        setRawBody(text);
+      } catch { /* ignore fetch errors for the fallback */ }
     } finally {
       setImporting(false);
+    }
+  };
+
+  const handleRepair = async () => {
+    if (!rawBody || repairing) return;
+    setRepairing(true);
+    setRepairedJson("");
+    try {
+      await streamAI(
+        "/ai/normalize-card",
+        { raw: rawBody },
+        (chunk) => setRepairedJson((r) => r + chunk),
+        () => setRepairing(false),
+      );
+    } catch {
+      setRepairing(false);
     }
   };
 
@@ -163,6 +190,22 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
               <Icon name="download" size={14} />{importing ? "Importing…" : "Fetch & validate"}
             </button>
           </div>
+          {importError && rawBody && (
+            <div style={{ marginTop: 14, padding: "12px 14px", background: "var(--surface-2)", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, marginBottom: 8, color: "var(--warn)" }}>
+                Import failed — the response may not be valid JSON.
+              </div>
+              <button className="btn btn-sm" disabled={repairing} onClick={handleRepair}>
+                <Icon name="zap" size={13} />
+                {repairing ? "Repairing…" : "Try to repair with AI"}
+              </button>
+              {repairedJson && (
+                <pre style={{ marginTop: 10, fontSize: 11, whiteSpace: "pre-wrap", maxHeight: 200, overflow: "auto", color: "var(--text-2)" }}>
+                  {repairedJson}
+                </pre>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
