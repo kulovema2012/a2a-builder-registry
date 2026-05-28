@@ -472,8 +472,27 @@ function ExamplesStep({ draft }: { draft: DraftType }) {
 }
 
 function ReviewStep({ draft, validation, onPublish }: { draft: DraftType; validation: { score: number; errors: number; warnings: number; items: { state: string; label: string; detail: string }[] }; onPublish: () => void }) {
+  const [explaining, setExplaining] = useState<number | null>(null);
+  const [explanations, setExplanations] = useState<Record<number, string>>({});
   const stateClass: Record<string, string> = { ok: "badge-ok", warn: "badge-warn", err: "badge-err" };
   const stateIcon: Record<string, string> = { ok: "check2", warn: "warning", err: "alert" };
+
+  const explain = async (idx: number, item: { state: string; label: string; detail: string }) => {
+    if (explaining !== null) return;
+    setExplaining(idx);
+    setExplanations((e) => ({ ...e, [idx]: "" }));
+    try {
+      await streamAI(
+        "/ai/explain-check",
+        { label: item.label, detail: item.detail, state: item.state },
+        (chunk) => setExplanations((e) => ({ ...e, [idx]: (e[idx] ?? "") + chunk })),
+        () => setExplaining(null),
+      );
+    } catch {
+      setExplaining(null);
+    }
+  };
+
   return (
     <div className="review">
       <div className="review-checks card section">
@@ -494,8 +513,25 @@ function ReviewStep({ draft, validation, onPublish }: { draft: DraftType; valida
             <li key={i}>
               <span className={"vp-state " + stateClass[c.state]}><Icon name={stateIcon[c.state]} size={11} /></span>
               <div style={{ flex: 1 }}>
-                <div>{c.label}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span>{c.label}</span>
+                  {(c.state === "err" || c.state === "warn") && (
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      style={{ fontSize: 11, padding: "1px 6px" }}
+                      disabled={explaining !== null}
+                      onClick={() => explain(i, c)}
+                    >
+                      {explaining === i ? "Explaining…" : "Explain →"}
+                    </button>
+                  )}
+                </div>
                 <div className="muted" style={{ fontSize: 11.5 }}>{c.detail}</div>
+                {explanations[i] && (
+                  <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.55, color: "var(--text-2)", background: "var(--surface-2)", borderRadius: 6, padding: "8px 10px" }}>
+                    {explanations[i]}
+                  </div>
+                )}
               </div>
             </li>
           ))}
