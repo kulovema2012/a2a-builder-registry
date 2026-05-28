@@ -1,4 +1,5 @@
 pub mod admin;
+pub mod ai;
 pub mod auth;
 pub mod console;
 pub mod health;
@@ -20,4 +21,5 @@ pub fn router() -> Router<AppState> {
         .merge(import::router())
         .merge(console::router())
         .merge(admin::router())
+        .merge(ai::router())
 }
