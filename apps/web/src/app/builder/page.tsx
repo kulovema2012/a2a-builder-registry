@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/shared/icon";
-import { api } from "@/lib/api";
+import { api, streamAI } from "@/lib/api";
 import { buildAgentCardJSON, HighlightedJSON } from "@/lib/json-view";
 
 const BUILDER_STEPS = [
@@ -122,17 +122,44 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
+  const [rawBody, setRawBody] = useState("");
+  const [repairing, setRepairing] = useState(false);
+  const [repairedJson, setRepairedJson] = useState("");
 
   const handleImport = async () => {
     if (!importUrl.trim()) return;
     setImporting(true);
     setImportError("");
+    setRawBody("");
+    setRepairedJson("");
     try {
       onImport(importUrl.trim());
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : "Import failed");
+      const msg = err instanceof Error ? err.message : "Import failed";
+      setImportError(msg);
+      try {
+        const res = await fetch(importUrl.trim());
+        const text = await res.text();
+        setRawBody(text);
+      } catch { /* ignore fetch errors for the fallback */ }
     } finally {
       setImporting(false);
+    }
+  };
+
+  const handleRepair = async () => {
+    if (!rawBody || repairing) return;
+    setRepairing(true);
+    setRepairedJson("");
+    try {
+      await streamAI(
+        "/ai/normalize-card",
+        { raw: rawBody },
+        (chunk) => setRepairedJson((r) => r + chunk),
+        () => setRepairing(false),
+      );
+    } catch {
+      setRepairing(false);
     }
   };
 
@@ -163,6 +190,22 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
               <Icon name="download" size={14} />{importing ? "Importing…" : "Fetch & validate"}
             </button>
           </div>
+          {importError && rawBody && (
+            <div style={{ marginTop: 14, padding: "12px 14px", background: "var(--surface-2)", borderRadius: 8 }}>
+              <div style={{ fontSize: 12, marginBottom: 8, color: "var(--warn)" }}>
+                Import failed — the response may not be valid JSON.
+              </div>
+              <button className="btn btn-sm" disabled={repairing} onClick={handleRepair}>
+                <Icon name="zap" size={13} />
+                {repairing ? "Repairing…" : "Try to repair with AI"}
+              </button>
+              {repairedJson && (
+                <pre style={{ marginTop: 10, fontSize: 11, whiteSpace: "pre-wrap", maxHeight: 200, overflow: "auto", color: "var(--text-2)" }}>
+                  {repairedJson}
+                </pre>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -170,8 +213,72 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
 }
 
 function IdentityStep({ draft, set }: { draft: DraftType; set: (patch: Partial<DraftType>) => void }) {
+  const [desc, setDesc] = useState("");
+  const [filling, setFilling] = useState(false);
+  const [preview, setPreview] = useState("");
+
+  const autoFill = async () => {
+    if (!desc.trim() || filling) return;
+    setFilling(true);
+    setPreview("");
+    try {
+      await streamAI(
+        "/ai/autofill",
+        { description: desc },
+        (chunk) => setPreview((p) => p + chunk),
+        (full) => {
+          try {
+            const parsed = JSON.parse(full) as Record<string, unknown>;
+            set({
+              name: (parsed.name as string | undefined) ?? draft.name,
+              description: (parsed.description as string | undefined) ?? draft.description,
+              version: (parsed.version as string | undefined) ?? draft.version,
+              tags: (parsed.tags as string[] | undefined) ?? draft.tags,
+              skills: (parsed.skills as typeof draft.skills | undefined) ?? draft.skills,
+              provider: parsed.provider
+                ? { organization: (parsed.provider as Record<string, string>).organization ?? "", url: (parsed.provider as Record<string, string>).url ?? "" }
+                : draft.provider,
+              defaultInputModes: (parsed.defaultInputModes as string[] | undefined) ?? draft.defaultInputModes,
+              defaultOutputModes: (parsed.defaultOutputModes as string[] | undefined) ?? draft.defaultOutputModes,
+              capabilities: (parsed.capabilities as typeof draft.capabilities | undefined) ?? draft.capabilities,
+            });
+            setPreview("");
+          } catch { /* leave preview visible so user can see the raw output */ }
+          setFilling(false);
+        },
+      );
+    } catch (e) {
+      setFilling(false);
+      alert(e instanceof Error ? e.message : "Auto-fill failed");
+    }
+  };
+
   return (
     <FormGrid>
+      <div className="field full" style={{ background: "var(--surface-2)", borderRadius: 8, padding: "14px 16px", marginBottom: 4 }}>
+        <div className="label">Auto-fill from description <span className="badge badge-sm badge-signal">AI</span></div>
+        <textarea
+          className="textarea"
+          rows={2}
+          placeholder='e.g. "A billing assistant that answers invoice questions for SaaS customers"'
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        <button
+          className="btn btn-sm btn-primary"
+          style={{ marginTop: 8 }}
+          disabled={filling || !desc.trim()}
+          onClick={autoFill}
+        >
+          <Icon name="zap" size={13} />
+          {filling ? "Filling…" : "Auto-fill form"}
+        </button>
+        {preview && (
+          <pre style={{ marginTop: 8, fontSize: 11, color: "var(--text-3)", whiteSpace: "pre-wrap", maxHeight: 120, overflow: "auto" }}>
+            {preview}
+          </pre>
+        )}
+      </div>
       <Field label="Agent name" required hint="A short, distinct name. Maps to Agent Card `name`.">
         <input className="input" value={draft.name} onChange={e => set({ name: e.target.value })} placeholder="e.g. WeatherWise" />
       </Field>
@@ -408,8 +515,27 @@ function ExamplesStep({ draft }: { draft: DraftType }) {
 }
 
 function ReviewStep({ draft, validation, onPublish }: { draft: DraftType; validation: { score: number; errors: number; warnings: number; items: { state: string; label: string; detail: string }[] }; onPublish: () => void }) {
+  const [explaining, setExplaining] = useState<number | null>(null);
+  const [explanations, setExplanations] = useState<Record<number, string>>({});
   const stateClass: Record<string, string> = { ok: "badge-ok", warn: "badge-warn", err: "badge-err" };
   const stateIcon: Record<string, string> = { ok: "check2", warn: "warning", err: "alert" };
+
+  const explain = async (idx: number, item: { state: string; label: string; detail: string }) => {
+    if (explaining !== null) return;
+    setExplaining(idx);
+    setExplanations((e) => ({ ...e, [idx]: "" }));
+    try {
+      await streamAI(
+        "/ai/explain-check",
+        { label: item.label, detail: item.detail, state: item.state },
+        (chunk) => setExplanations((e) => ({ ...e, [idx]: (e[idx] ?? "") + chunk })),
+        () => setExplaining(null),
+      );
+    } catch {
+      setExplaining(null);
+    }
+  };
+
   return (
     <div className="review">
       <div className="review-checks card section">
@@ -430,8 +556,25 @@ function ReviewStep({ draft, validation, onPublish }: { draft: DraftType; valida
             <li key={i}>
               <span className={"vp-state " + stateClass[c.state]}><Icon name={stateIcon[c.state]} size={11} /></span>
               <div style={{ flex: 1 }}>
-                <div>{c.label}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span>{c.label}</span>
+                  {(c.state === "err" || c.state === "warn") && (
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      style={{ fontSize: 11, padding: "1px 6px" }}
+                      disabled={explaining !== null}
+                      onClick={() => explain(i, c)}
+                    >
+                      {explaining === i ? "Explaining…" : "Explain →"}
+                    </button>
+                  )}
+                </div>
                 <div className="muted" style={{ fontSize: 11.5 }}>{c.detail}</div>
+                {explanations[i] && (
+                  <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.55, color: "var(--text-2)", background: "var(--surface-2)", borderRadius: 6, padding: "8px 10px" }}>
+                    {explanations[i]}
+                  </div>
+                )}
               </div>
             </li>
           ))}

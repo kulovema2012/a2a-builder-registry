@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Icon } from "@/components/shared/icon";
-import { api, type RegistryAgent, type Skill } from "@/lib/api";
+import { api, streamAI, type RegistryAgent, type Skill } from "@/lib/api";
 import { HighlightedJSON } from "@/lib/json-view";
 
 function ValidationDot({ status, size = 6 }: { status?: string; size?: number }) {
@@ -16,6 +16,7 @@ function TestConsole({ agentId, agents }: { agentId: string; agents: RegistryAge
   const [input, setInput] = useState("Hello");
   const [showRaw, setShowRaw] = useState(false);
   const [running, setRunning] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
   const [lastResponse, setLastResponse] = useState<unknown>(null);
   const [lastRequest, setLastRequest] = useState<unknown>(null);
@@ -32,6 +33,26 @@ function TestConsole({ agentId, agents }: { agentId: string; agents: RegistryAge
       setSkillId(res.skills[0]?.external_skill_id ?? res.skills[0]?.id ?? "");
     }).catch(() => setSkills([]));
   }, [agentId]);
+
+  const suggestMessage = async () => {
+    const selectedSkill = skills.find(s => (s.external_skill_id ?? s.id) === skillId);
+    if (!selectedSkill || suggesting) return;
+    setSuggesting(true);
+    setInput("");
+    try {
+      const examples = Array.isArray(selectedSkill.examples)
+        ? (selectedSkill.examples as unknown[]).filter((e): e is string => typeof e === "string")
+        : [];
+      await streamAI(
+        "/ai/suggest-message",
+        { skill_name: selectedSkill.name, skill_description: selectedSkill.description ?? "", examples },
+        (chunk) => setInput((v) => v + chunk),
+        () => setSuggesting(false),
+      );
+    } catch {
+      setSuggesting(false);
+    }
+  };
 
   const send = async () => {
     if (!input.trim() || running) return;
@@ -65,9 +86,20 @@ function TestConsole({ agentId, agents }: { agentId: string; agents: RegistryAge
         {skills.length > 0 && (
           <div className="tc-control" style={{ minWidth: 200 }}>
             <div className="tiny">Skill</div>
-            <select className="select" value={skillId} onChange={e => setSkillId(e.target.value)}>
-              {skills.map(s => <option key={s.id} value={s.external_skill_id ?? s.id}>{s.name}</option>)}
-            </select>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <select className="select" value={skillId} onChange={e => setSkillId(e.target.value)}>
+                {skills.map(s => <option key={s.id} value={s.external_skill_id ?? s.id}>{s.name}</option>)}
+              </select>
+              <button
+                className="btn btn-sm"
+                disabled={!skillId || suggesting}
+                onClick={suggestMessage}
+                title="Generate a realistic test message for this skill"
+              >
+                <Icon name="zap" size={13} />
+                {suggesting ? "Suggesting…" : "Suggest"}
+              </button>
+            </div>
           </div>
         )}
         <button className="btn btn-sm" style={{ marginTop: 18 }} onClick={() => { setMessages([]); setLastResponse(null); setLastRequest(null); }} disabled={messages.length === 0}>

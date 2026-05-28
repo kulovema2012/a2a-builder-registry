@@ -299,3 +299,51 @@ export const api = {
   initializeMcp: (serviceId: string) =>
     apiFetch<unknown>(`/mcp/initialize`, { method: "POST", body: JSON.stringify({ service_id: serviceId }) }),
 };
+
+// ── AI streaming helper ─────────────────────────────────────────
+
+export async function streamAI(
+  path: string,
+  body: unknown,
+  onChunk: (text: string) => void,
+  onDone: (full: string) => void,
+): Promise<void> {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/api/v1${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok || !res.body) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error((err as { detail?: string }).detail || `AI error: ${res.status}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let full = "";
+  let leftover = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const text = leftover + decoder.decode(value, { stream: true });
+    const lines = text.split("\n");
+    leftover = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6).trim();
+      if (data === "[DONE]") { onDone(full); return; }
+      try {
+        const parsed = JSON.parse(data) as { choices?: { delta?: { content?: string } }[] };
+        const chunk = parsed?.choices?.[0]?.delta?.content ?? "";
+        if (chunk) { full += chunk; onChunk(chunk); }
+      } catch { /* skip malformed SSE lines */ }
+    }
+  }
+  onDone(full);
+}

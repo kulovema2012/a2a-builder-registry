@@ -10,6 +10,9 @@ pub struct Config {
     pub agent_card_fetch_timeout: u64,
     pub mcp_probe_timeout: u64,
     pub port: u16,
+    pub openrouter_api_key: String,
+    pub openrouter_base_url: String,
+    pub openrouter_model: String,
 }
 
 impl Config {
@@ -38,6 +41,11 @@ impl Config {
             port: env::var("PORT")
                 .unwrap_or_else(|_| "8000".to_string())
                 .parse()?,
+            openrouter_api_key: env::var("OPENROUTER_API_KEY").unwrap_or_default(),
+            openrouter_base_url: env::var("OPENROUTER_BASE_URL")
+                .unwrap_or_else(|_| "https://openrouter.ai/api/v1".to_string()),
+            openrouter_model: env::var("OPENROUTER_MODEL")
+                .unwrap_or_else(|_| "anthropic/claude-haiku-4-5".to_string()),
         })
     }
 }

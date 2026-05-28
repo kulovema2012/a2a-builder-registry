@@ -28,6 +28,9 @@ mod tests {
                 agent_card_fetch_timeout: 10,
                 mcp_probe_timeout: 5,
                 port: 8000,
+                openrouter_api_key: String::new(),
+                openrouter_base_url: "https://openrouter.ai/api/v1".to_string(),
+                openrouter_model: "anthropic/claude-haiku-4-5".to_string(),
             },
         });
         let response = app
