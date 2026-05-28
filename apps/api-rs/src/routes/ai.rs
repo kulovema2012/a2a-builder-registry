@@ -114,7 +114,9 @@ impl OpenRouterClient {
             while let Some(chunk) = byte_stream.next().await {
                 let Ok(bytes) = chunk else { break };
                 buf.push_str(&String::from_utf8_lossy(&bytes));
-                for line in buf.lines() {
+                while let Some(pos) = buf.find('\n') {
+                    let line = buf[..pos].trim_end_matches('\r').to_string();
+                    buf = buf[pos + 1..].to_string();
                     if line.starts_with("data: ") {
                         let data = &line[6..];
                         let _ = tx.send(Ok(Event::default().data(data))).await;
@@ -122,11 +124,6 @@ impl OpenRouterClient {
                             return;
                         }
                     }
-                }
-                if let Some(pos) = buf.rfind('\n') {
-                    buf = buf[pos + 1..].to_string();
-                } else {
-                    buf.clear();
                 }
             }
             let _ = tx.send(Ok(Event::default().data("[DONE]"))).await;

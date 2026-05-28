@@ -326,12 +326,15 @@ export async function streamAI(
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let full = "";
+  let leftover = "";
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    const text = decoder.decode(value, { stream: true });
-    for (const line of text.split("\n")) {
+    const text = leftover + decoder.decode(value, { stream: true });
+    const lines = text.split("\n");
+    leftover = lines.pop() ?? "";
+    for (const line of lines) {
       if (!line.startsWith("data: ")) continue;
       const data = line.slice(6).trim();
       if (data === "[DONE]") { onDone(full); return; }
