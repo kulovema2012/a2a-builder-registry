@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/shared/icon";
-import { api } from "@/lib/api";
+import { api, streamAI } from "@/lib/api";
 import { buildAgentCardJSON, HighlightedJSON } from "@/lib/json-view";
 
 const BUILDER_STEPS = [
@@ -170,8 +170,72 @@ function StartStep({ setStep, importMode, setImportMode, onImport }: { setStep: 
 }
 
 function IdentityStep({ draft, set }: { draft: DraftType; set: (patch: Partial<DraftType>) => void }) {
+  const [desc, setDesc] = useState("");
+  const [filling, setFilling] = useState(false);
+  const [preview, setPreview] = useState("");
+
+  const autoFill = async () => {
+    if (!desc.trim() || filling) return;
+    setFilling(true);
+    setPreview("");
+    try {
+      await streamAI(
+        "/ai/autofill",
+        { description: desc },
+        (chunk) => setPreview((p) => p + chunk),
+        (full) => {
+          try {
+            const parsed = JSON.parse(full) as Record<string, unknown>;
+            set({
+              name: (parsed.name as string | undefined) ?? draft.name,
+              description: (parsed.description as string | undefined) ?? draft.description,
+              version: (parsed.version as string | undefined) ?? draft.version,
+              tags: (parsed.tags as string[] | undefined) ?? draft.tags,
+              skills: (parsed.skills as typeof draft.skills | undefined) ?? draft.skills,
+              provider: parsed.provider
+                ? { organization: (parsed.provider as Record<string, string>).organization ?? "", url: (parsed.provider as Record<string, string>).url ?? "" }
+                : draft.provider,
+              defaultInputModes: (parsed.defaultInputModes as string[] | undefined) ?? draft.defaultInputModes,
+              defaultOutputModes: (parsed.defaultOutputModes as string[] | undefined) ?? draft.defaultOutputModes,
+              capabilities: (parsed.capabilities as typeof draft.capabilities | undefined) ?? draft.capabilities,
+            });
+            setPreview("");
+          } catch { /* leave preview visible so user can see the raw output */ }
+          setFilling(false);
+        },
+      );
+    } catch (e) {
+      setFilling(false);
+      alert(e instanceof Error ? e.message : "Auto-fill failed");
+    }
+  };
+
   return (
     <FormGrid>
+      <div className="field full" style={{ background: "var(--surface-2)", borderRadius: 8, padding: "14px 16px", marginBottom: 4 }}>
+        <div className="label">Auto-fill from description <span className="badge badge-sm badge-signal">AI</span></div>
+        <textarea
+          className="textarea"
+          rows={2}
+          placeholder='e.g. "A billing assistant that answers invoice questions for SaaS customers"'
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        <button
+          className="btn btn-sm btn-primary"
+          style={{ marginTop: 8 }}
+          disabled={filling || !desc.trim()}
+          onClick={autoFill}
+        >
+          <Icon name="zap" size={13} />
+          {filling ? "Filling…" : "Auto-fill form"}
+        </button>
+        {preview && (
+          <pre style={{ marginTop: 8, fontSize: 11, color: "var(--text-3)", whiteSpace: "pre-wrap", maxHeight: 120, overflow: "auto" }}>
+            {preview}
+          </pre>
+        )}
+      </div>
       <Field label="Agent name" required hint="A short, distinct name. Maps to Agent Card `name`.">
         <input className="input" value={draft.name} onChange={e => set({ name: e.target.value })} placeholder="e.g. WeatherWise" />
       </Field>
